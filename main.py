@@ -14,12 +14,12 @@ def main() -> None:
 
     tasks = [
         Task(
-            title="Morning walk",
-            category="walk",
-            duration=30,
+            title="Give Mittens medication",
+            category="medication",
+            duration=15,
             priority=5,
-            pet_id=pet1.id,
-            preferred_time=time(8, 0),
+            pet_id=pet2.id,
+            preferred_time=time(10, 0),
         ),
         Task(
             title="Feed Biscuit",
@@ -30,12 +30,20 @@ def main() -> None:
             preferred_time=time(9, 0),
         ),
         Task(
-            title="Give Mittens medication",
-            category="medication",
-            duration=15,
+            title="Morning walk",
+            category="walk",
+            duration=30,
             priority=5,
+            pet_id=pet1.id,
+            preferred_time=time(8, 0),
+        ),
+        Task(
+            title="Play session",
+            category="play",
+            duration=30,
+            priority=3,
             pet_id=pet2.id,
-            preferred_time=time(10, 0),
+            preferred_time=time(8, 0),
         ),
     ]
 
@@ -49,6 +57,24 @@ def main() -> None:
         pet_name = pet.name if pet else "Unknown pet"
         start_time = task.scheduled_start.strftime("%H:%M") if task.scheduled_start else "unscheduled"
         print(f"{start_time} — {task.title} ({task.category}) for {pet_name} [{task.duration} min]")
+
+    print("\nFiltered pending tasks:")
+    for task in scheduler.filter_tasks(completed=False):
+        print(f"- {task.title} ({task.pet_name or 'unknown'})")
+
+    print("\nSorted by time:")
+    for task in scheduler.sort_by_time(plan):
+        print(f"- {task.title} at {task.scheduled_start.strftime('%H:%M') if task.scheduled_start else 'unscheduled'}")
+
+    overlap_a = Task(title="Overlapping check A", category="feeding", duration=20, priority=5, pet_name="Biscuit")
+    overlap_b = Task(title="Overlapping check B", category="walk", duration=20, priority=5, pet_name="Mittens")
+    overlap_a.scheduled_start = datetime(2024, 1, 1, 8, 0)
+    overlap_a.scheduled_end = datetime(2024, 1, 1, 8, 20)
+    overlap_b.scheduled_start = datetime(2024, 1, 1, 8, 0)
+    overlap_b.scheduled_end = datetime(2024, 1, 1, 8, 20)
+
+    print("\nConflict check:")
+    print(scheduler.lightweight_conflict_check([overlap_a, overlap_b]))
 
 
 if __name__ == "__main__":

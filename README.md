@@ -76,10 +76,10 @@ Sample test output:
 
 | Feature | Method(s) | Notes |
 |---------|-----------|-------|
-| Task sorting | | e.g., by priority, duration |
-| Filtering | | e.g., skip tasks if time runs out |
-| Conflict handling | | e.g., overlapping time slots |
-| Recurring tasks | | e.g., daily vs. weekly |
+| Task sorting | sort_tasks() and sort_by_time() | e.g., by priority, duration |
+| Filtering | filter_tasks() | e.g., skip tasks if time runs out |
+| Conflict handling | detect_overlaps() and lightweight_conflict_check() | e.g., overlapping time slots |
+| Recurring tasks | mark_task_complete() and next_occurrence() | e.g., daily vs. weekly |
 
 ## 📸 Demo Walkthrough
 

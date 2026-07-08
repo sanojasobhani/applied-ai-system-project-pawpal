@@ -24,7 +24,9 @@
 **b. Tradeoffs**
 
 - Describe one tradeoff your scheduler makes.
+    Current conflict check detects exact ocerlaps and not partial overlaps.
 - Why is that tradeoff reasonable for this scenario?
+    its reasonable because the app is a lightweight pet care planner and not a full calendar, and a simple overlap checl keeps the code fast and easy.
 
 ---
 
