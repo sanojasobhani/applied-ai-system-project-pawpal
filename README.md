@@ -46,12 +46,12 @@ pip install -r requirements.txt
 
 Paste a sample of your app's CLI or Streamlit output here so a reader can see what a generated plan looks like:
 
-```
-# e.g.:
-# Daily plan for Biscuit (Golden Retriever):
-#   08:00 — Morning walk (30 min) [priority: high]
-#   09:00 — Feeding (10 min) [priority: high]
-#   ...
+```text
+Today's Schedule
+-----------------
+08:00 — Morning walk (walk) for Biscuit [30 min]
+08:30 — Give Mittens medication (medication) for Mittens [15 min]
+08:45 — Feed Biscuit (feeding) for Biscuit [10 min]
 ```
 
 ## 🧪 Testing PawPal+
@@ -79,6 +79,7 @@ tests\tests_pawpal.py .............                                             
 ========================================================== 13 passed in 0.07s ==========================================================
 ```
 confidence level: 5 stars
+
 ## 📐 Smarter Scheduling
 
 > Fill in once you've implemented scheduling logic.
@@ -90,14 +91,39 @@ confidence level: 5 stars
 | Conflict handling | detect_overlaps() and lightweight_conflict_check() | e.g., overlapping time slots |
 | Recurring tasks | mark_task_complete() and next_occurrence() | e.g., daily vs. weekly |
 
-## 📸 Demo Walkthrough
+## ✨ Features
 
-Describe your app in numbered steps so a reader can follow along without watching a video:
+PawPal+ uses a lightweight scheduling engine to turn a list of pet-care tasks into an ordered, conflict-aware daily plan.
 
-1. <!-- Describe this step -->
-2. <!-- Describe this step -->
-3. <!-- Describe this step -->
-4. <!-- Describe this step -->
-5. <!-- Add more steps as needed -->
+- Priority-based task ordering using a weighted scoring system that favors urgent care tasks such as medication and feeding.
+- Preferred-time-aware scheduling so tasks can be placed around a user’s preferred start time when possible.
+- Conflict detection and warning messages for overlapping task windows.
+- Automatic conflict resolution by shifting tasks to the next available slot when needed.
+- Chronological display of the final plan so the schedule is easy to read and follow.
+- Pet-specific task filtering for viewing tasks associated with a selected pet.
+- Support for recurring tasks with daily or weekly follow-up scheduling.
+- Availability-aware planning based on the owner’s permitted scheduling window.
+- Plan explanations that describe why each task was placed at its assigned time.
 
-**Screenshot or video** *(optional)*: <!-- Insert a screenshot or link to a demo video here -->
+## 🎬 Demo Walkthrough
+
+PawPal+ is designed as a simple but interactive pet-care planning experience. In the Streamlit UI, a user can enter owner and pet details, add care tasks, and generate a daily plan with explanations.
+
+1. Open the app and enter the owner name, pet name, species, and age. The app stores this information in the owner and pet models.
+2. Add one or more tasks such as a walk, feeding, or medication. Each task includes a title, duration, and priority.
+3. Click “Generate schedule” to let the scheduler build a plan. The scheduler sorts tasks by priority, respects preferred times, and checks for conflicts.
+4. Review the generated plan in the table view. Tasks appear in chronological order, and the app shows warning messages if overlapping tasks are detected.
+5. Use the pet filter to focus on tasks for a specific pet and compare how the schedule changes.
+
+The scheduler demonstrates several key behaviors during this workflow:
+- Sorting by priority and time to decide task order
+- Conflict warnings when two tasks overlap
+- Automatic conflict resolution by shifting tasks into the next available slot
+- Recurring-task support for daily or weekly care routines
+
+Example CLI output from running the scheduler in main.py:
+
+```text
+1. Feeding was placed at 08:00 because it scored 7 and was ordered ahead of lower-priority work. It also matched the preferred time of 08:00. This is a high-importance care task.
+2. Morning walk was placed at 08:10 because it scored 7 and was ordered ahead of lower-priority work. It also matched the preferred time of 08:00.
+```

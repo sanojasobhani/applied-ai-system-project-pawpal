@@ -1,0 +1,69 @@
+classDiagram
+    class Task {
+        +String title
+        +String category
+        +int duration
+        +int priority
+        +time preferred_time
+        +String recurrence
+        +String status
+        +String notes
+        +String pet_name
+        +String pet_id
+        +datetime scheduled_start
+        +datetime scheduled_end
+        +mark_complete()
+        +next_occurrence()
+        +reschedule(new_time)
+        +conflicts_with(other_task)
+        +priority_score()
+    }
+
+    class Pet {
+        +String name
+        +String species
+        +int age
+        +String id
+        +String health_notes
+        +List~String~ needs
+        +List~Task~ tasks
+        +add_need(need)
+        +update_health_notes(notes)
+        +add_task(task)
+        +task_count()
+        +daily_requirements()
+    }
+
+    class Owner {
+        +String name
+        +String contact_info
+        +Dict availability
+        +List~Pet~ pets
+        +set_availability(availability)
+        +set_preference(key, value)
+        +can_schedule(task_time)
+        +add_pet(pet)
+        +get_pet(pet_id)
+    }
+
+    class Scheduler {
+        +Owner owner
+        +List~Task~ tasks
+        +Dict constraints
+        +int buffer_minutes
+        +add_task(task)
+        +mark_task_complete(task)
+        +sort_tasks(tasks)
+        +sort_by_time(tasks)
+        +filter_tasks(completed, pet_name)
+        +detect_overlaps(tasks)
+        +lightweight_conflict_check(tasks)
+        +resolve_conflicts(tasks, start_dt)
+        +generate_plan(start_dt)
+        +explain_plan(plan)
+    }
+
+    Owner "1" o-- "0..*" Pet : owns
+    Pet "1" o-- "0..*" Task : tracks
+    Scheduler "1" o-- "1" Owner : manages
+    Scheduler "1" o-- "0..*" Task : schedules
