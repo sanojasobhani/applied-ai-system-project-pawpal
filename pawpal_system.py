@@ -32,14 +32,14 @@ class Task:
         next_task.scheduled_start = None
         next_task.scheduled_end = None
 
-        if self.recurrence == "daily":
-            next_task.preferred_time = self.preferred_time
-            return next_task
+        if self.recurrence == "daily" and self.scheduled_start and self.scheduled_end:
+            next_task.scheduled_start = self.scheduled_start + timedelta(days=1)
+            next_task.scheduled_end = self.scheduled_end + timedelta(days=1)
+        elif self.recurrence == "weekly" and self.scheduled_start and self.scheduled_end:
+            next_task.scheduled_start = self.scheduled_start + timedelta(weeks=1)
+            next_task.scheduled_end = self.scheduled_end + timedelta(weeks=1)
 
-        if self.recurrence == "weekly":
-            next_task.preferred_time = self.preferred_time
-            return next_task
-
+        next_task.preferred_time = self.preferred_time
         return next_task
 
     def reschedule(self, new_time: time) -> None:
