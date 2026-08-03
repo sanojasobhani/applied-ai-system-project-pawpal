@@ -45,3 +45,39 @@ def test_ai_plan_report_scores_reliable_schedule():
     assert result["guidance"]
     assert result["reliability"]["score"] >= 70
     assert result["reliability"]["status"] in {"good", "excellent"}
+
+
+def test_time_of_day_keywords_infer_sensible_preferred_times():
+    breakfast = Task(title="Breakfast", category="feeding", duration=10, priority=4, pet_name="Mochi")
+    lunch = Task(title="Lunch", category="feeding", duration=10, priority=4, pet_name="Mochi")
+    dinner = Task(title="Dinner", category="feeding", duration=10, priority=4, pet_name="Mochi")
+    morning_walk = Task(title="Morning walk", category="walk", duration=30, priority=3, pet_name="Mochi")
+    evening_walk = Task(title="Evening walk", category="walk", duration=30, priority=3, pet_name="Mochi")
+    night_check = Task(title="Night check", category="general", duration=10, priority=2, pet_name="Mochi")
+
+    assert breakfast.infer_time_preference() == time(7, 30)
+    assert lunch.infer_time_preference() == time(12, 0)
+    assert dinner.infer_time_preference() == time(18, 0)
+    assert morning_walk.infer_time_preference() == time(8, 0)
+    assert evening_walk.infer_time_preference() == time(18, 30)
+    assert night_check.infer_time_preference() == time(21, 0)
+
+
+def test_generate_plan_places_daypart_tasks_in_appropriate_windows():
+    owner = Owner("Jordan")
+    owner.set_availability({"start": time(7, 0), "end": time(23, 0)})
+
+    morning_walk = Task(title="Morning walk", category="walk", duration=30, priority=3, pet_name="Mochi")
+    lunch = Task(title="Lunch", category="feeding", duration=20, priority=4, pet_name="Mochi")
+    dinner = Task(title="Dinner", category="feeding", duration=20, priority=4, pet_name="Mochi")
+    night_check = Task(title="Night check", category="general", duration=15, priority=2, pet_name="Mochi")
+
+    scheduler = Scheduler(owner, tasks=[lunch, dinner, night_check, morning_walk])
+    plan = scheduler.generate_plan(start_dt=datetime(2024, 1, 1, 7, 0))
+
+    scheduled_times = {task.title: task.scheduled_start.time() for task in plan}
+
+    assert scheduled_times["Morning walk"].hour < 12
+    assert 11 <= scheduled_times["Lunch"].hour <= 13
+    assert 17 <= scheduled_times["Dinner"].hour <= 20
+    assert scheduled_times["Night check"].hour >= 20

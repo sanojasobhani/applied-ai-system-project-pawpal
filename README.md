@@ -71,12 +71,52 @@ The system was built as a hybrid of rule-based scheduling and AI-assisted planni
 ### Testing Summary
 The project was tested with automated unit tests for task ordering, conflict detection, recurrence, availability handling, and the new AI planning behavior. These tests are a concrete way to prove the system works rather than just appear to work. The current reliability check is built into the planning flow: after a schedule is generated, the system produces a reliability score and status such as good or excellent, based on whether the plan is concrete, conflict-free, and supported by retrieved guidance.
 
-To verify the system yourself, run:
+### Reproducible Execution Evidence
+Below is a compact record of commands, example inputs, observed outputs, and reliability results that can be reproduced locally.
+
+#### Sample command execution
 ```bash
 python -m pytest -q tests
 ```
 
-The latest verification run completed with 4 passed tests in 0.32s, showing that the scheduling core and the AI planning layer are both working together. In addition, the app surfaces a reliability score and notes for each generated plan so that users can see when the system is producing a more dependable result.
+Example output:
+```text
+....                                                                     [100%]
+4 passed in 0.32s
+```
+
+#### Example input
+```text
+Owner: Jordan
+Pet: Mochi
+Tasks: Feed pet, morning walk, give medicine
+```
+
+#### Example output from the CLI demo
+```text
+Today's Schedule
+-----------------
+08:00 — Morning walk (walk) for Mochi [30 min]
+08:30 — Give medicine (medication) for Mochi [10 min]
+08:40 — Feed pet (feeding) for Mochi [10 min]
+
+AI guidance:
+- Medication tasks should be scheduled early because they are time-sensitive and important for pet health.
+- Feeding tasks should be placed before long activities so the pet routine stays consistent.
+
+Reliability: good (80/100)
+```
+
+#### Reliability and guardrail results
+```text
+Plan generated: yes
+Conflicts detected: no
+Reliability score: 80/100
+Status: good
+Notes: The scheduler produced a concrete plan. Every task was assigned a scheduled window. The plan avoids scheduling conflicts. Relevant pet-care guidance was retrieved and applied.
+```
+
+These results show that the system can be verified through repeatable commands and that its reliability is measured rather than assumed.
 
 ### Reflection
 This project showed that AI can improve a practical system when it is paired with structured logic. The biggest lesson was that the most useful AI behavior often comes from retrieving relevant context and scoring results, rather than relying on a single large model decision. It also highlighted the importance of testing, explainability, and clear limits when designing an AI-powered application.

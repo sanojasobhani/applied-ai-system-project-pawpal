@@ -45,6 +45,29 @@ class Task:
     def reschedule(self, new_time: time) -> None:
         self.preferred_time = new_time
 
+    def infer_time_preference(self) -> Optional[time]:
+        if self.preferred_time is not None:
+            return self.preferred_time
+
+        title = self.title.lower()
+        if "breakfast" in title:
+            return time(7, 30)
+        if "lunch" in title or "noon" in title:
+            return time(12, 0)
+        if "dinner" in title:
+            return time(18, 0)
+        if "evening" in title:
+            return time(18, 30)
+        if "night" in title or "bedtime" in title:
+            return time(21, 0)
+        if "morning" in title:
+            return time(8, 0)
+        if "afternoon" in title:
+            return time(15, 0)
+        if "sunset" in title:
+            return time(19, 0)
+        return None
+
     def conflicts_with(self, other: "Task") -> bool:
         if not self.scheduled_start or not self.scheduled_end or not other.scheduled_start or not other.scheduled_end:
             return False
@@ -225,9 +248,9 @@ class Scheduler:
         return sorted(
             pending_tasks,
             key=lambda t: (
+                t.preferred_time is None and t.infer_time_preference() is None,
+                t.preferred_time or t.infer_time_preference() or time.max,
                 -t.priority_score(),
-                t.preferred_time is None,
-                t.preferred_time or time.max,
             ),
         )
 
@@ -308,10 +331,13 @@ class Scheduler:
         return planned
 
     def _calculate_candidate_start(self, task: Task, current_time: datetime, base_time: datetime) -> datetime:
-        if task.preferred_time is not None:
-            preferred_start = datetime.combine(base_time.date(), task.preferred_time)
+        preferred_time = task.preferred_time or task.infer_time_preference()
+        if preferred_time is not None:
+            preferred_start = datetime.combine(base_time.date(), preferred_time)
             if preferred_start < current_time:
-                return current_time
+                while preferred_start < current_time:
+                    preferred_start += timedelta(days=1)
+                return preferred_start
             return preferred_start
         return current_time
 
