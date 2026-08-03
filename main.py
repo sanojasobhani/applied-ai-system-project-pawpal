@@ -50,6 +50,9 @@ def main() -> None:
     scheduler = Scheduler(owner, tasks=tasks)
     plan = scheduler.generate_plan(start_dt=datetime.now().replace(hour=8, minute=0, second=0, microsecond=0))
 
+    ai_result = scheduler.generate_plan_with_ai(start_dt=datetime.now().replace(hour=8, minute=0, second=0, microsecond=0))
+    plan = ai_result["plan"]
+
     print("Today's Schedule")
     print("-----------------")
     for task in plan:
@@ -57,6 +60,12 @@ def main() -> None:
         pet_name = pet.name if pet else "Unknown pet"
         start_time = task.scheduled_start.strftime("%H:%M") if task.scheduled_start else "unscheduled"
         print(f"{start_time} — {task.title} ({task.category}) for {pet_name} [{task.duration} min]")
+
+    print("\nAI guidance:")
+    for item in ai_result["guidance"]:
+        print(f"- {item}")
+
+    print(f"\nReliability: {ai_result['reliability']['status']} ({ai_result['reliability']['score']}/100)")
 
     print("\nFiltered pending tasks:")
     for task in scheduler.filter_tasks(completed=False):

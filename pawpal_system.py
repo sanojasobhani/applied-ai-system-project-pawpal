@@ -96,6 +96,69 @@ class Pet:
         return list(self.needs)
 
 
+class CareKnowledgeBase:
+    def __init__(self, entries: Optional[List[Dict[str, Any]]] = None):
+        self.entries = entries or [
+            {
+                "category": "medication",
+                "guidance": "Medication tasks should be scheduled early because they are time-sensitive and important for pet health.",
+            },
+            {
+                "category": "feeding",
+                "guidance": "Feeding tasks should be placed before long activities so the pet routine stays consistent.",
+            },
+            {
+                "category": "walk",
+                "guidance": "Walks fit well after feeding or before rest, and should avoid conflicting with urgent care tasks.",
+            },
+            {
+                "category": "play",
+                "guidance": "Play sessions work best after essential care work is completed and can be used as a reward block.",
+            },
+            {
+                "category": "grooming",
+                "guidance": "Grooming tasks are easier when the pet is calm and the day’s high-priority care tasks are already planned.",
+            },
+        ]
+
+    def retrieve(self, tasks: List[Task], owner: Optional["Owner"] = None) -> List[str]:
+        guidance: List[str] = []
+        seen = set()
+
+        for task in tasks:
+            category = (task.category or "").lower()
+            for entry in self.entries:
+                if entry["category"] != category:
+                    continue
+                statement = entry["guidance"]
+                if statement not in seen:
+                    guidance.append(statement)
+                    seen.add(statement)
+
+        if owner and owner.pets:
+            for pet in owner.pets:
+                if pet.health_notes:
+                    note = f"{pet.name} health note: {pet.health_notes}"
+                    if note not in seen:
+                        guidance.append(note)
+                        seen.add(note)
+                if pet.needs:
+                    need_note = f"{pet.name} special needs: {', '.join(pet.needs)}"
+                    if need_note not in seen:
+                        guidance.append(need_note)
+                        seen.add(need_note)
+
+        return guidance
+
+
+class PlanningAdvisor:
+    def __init__(self, knowledge_base: Optional[CareKnowledgeBase] = None):
+        self.knowledge_base = knowledge_base or CareKnowledgeBase()
+
+    def retrieve_guidance(self, tasks: List[Task], owner: Optional["Owner"] = None) -> List[str]:
+        return self.knowledge_base.retrieve(tasks, owner)
+
+
 class Owner:
     def __init__(self, name: str, contact_info: Optional[str] = None, availability: Optional[Dict[str, Any]] = None):
         self.name = name
@@ -265,6 +328,43 @@ class Scheduler:
         tasks = self.sort_tasks(tasks)
         tasks = self.resolve_conflicts(tasks, start_dt=start_dt)
         return self.sort_by_time(tasks)
+
+    def generate_plan_with_ai(
+        self,
+        start_dt: Optional[datetime] = None,
+        knowledge_base: Optional[CareKnowledgeBase] = None,
+    ) -> Dict[str, Any]:
+        plan = self.generate_plan(start_dt=start_dt)
+        advisor = PlanningAdvisor(knowledge_base=knowledge_base)
+        guidance = advisor.retrieve_guidance(plan, self.owner)
+        reliability = self._evaluate_plan_reliability(plan, guidance)
+        return {"plan": plan, "guidance": guidance, "reliability": reliability}
+
+    def _evaluate_plan_reliability(self, plan: List[Task], guidance: List[str]) -> Dict[str, Any]:
+        score = 60
+        notes = []
+
+        if plan:
+            score += 10
+            notes.append("The scheduler produced a concrete plan.")
+        if all(task.scheduled_start and task.scheduled_end for task in plan):
+            score += 10
+            notes.append("Every task was assigned a scheduled window.")
+        if not self.detect_overlaps(plan):
+            score += 10
+            notes.append("The plan avoids scheduling conflicts.")
+        if guidance:
+            score += 10
+            notes.append("Relevant pet-care guidance was retrieved and applied.")
+
+        if score >= 90:
+            status = "excellent"
+        elif score >= 70:
+            status = "good"
+        else:
+            status = "needs-attention"
+
+        return {"score": min(score, 100), "status": status, "notes": " ".join(notes)}
 
     def explain_plan(self, plan: List[Task]) -> str:
         if not plan:

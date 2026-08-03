@@ -136,13 +136,27 @@ At minimum, your system should:
     st.caption("Generate a priority-based plan from the tasks you added.")
 
     if st.button("Generate schedule", key="generate_schedule_button"):
-        plan = scheduler.generate_plan(start_dt=datetime.now().replace(second=0, microsecond=0))
+        ai_result = scheduler.generate_plan_with_ai(start_dt=datetime.now().replace(second=0, microsecond=0))
+        plan = ai_result["plan"]
+        guidance = ai_result["guidance"]
+        reliability = ai_result["reliability"]
         conflict_warning = get_conflict_warning(scheduler, plan)
         explanation = scheduler.explain_plan(plan)
         if conflict_warning and "No conflicts detected." not in conflict_warning:
             st.warning(conflict_warning)
 
         st.success(explanation)
+
+        with st.expander("AI planning guidance", expanded=True):
+            if guidance:
+                for item in guidance:
+                    st.write(f"• {item}")
+            else:
+                st.info("No additional guidance was retrieved for this plan.")
+
+        st.caption(f"AI reliability: {reliability['status']} ({reliability['score']}/100)")
+        st.progress(reliability["score"] / 100.0)
+        st.info(reliability["notes"])
 
         if plan:
             plan_rows = [
