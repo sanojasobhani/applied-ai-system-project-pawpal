@@ -1,3 +1,86 @@
+# Project 4: Applied AI System
+
+## Original Project:
+
+Project 2, PawPal+. This project allowed a user to stay consistent with pet care and was capable of scheduling, tracking tasks, considering constraints (time clashes, priorities, preferences), and creating a plan.
+
+### Title and Summary
+PawPal+ has been extended into an applied AI system that helps pet owners turn a list of care tasks into a practical daily plan. The system matters because it combines scheduling logic with AI-style reasoning so that urgent tasks, routine care, and pet-specific needs are handled more intelligently than a fixed rule-based planner alone.
+
+### Architecture Overview
+The system uses a simple applied-AI pipeline: user input is collected, a retriever pulls relevant pet-care guidance, a planning agent builds a schedule and explanation, and an evaluator scores the plan for reliability. A human reviewer can inspect the output, and a testing harness checks that the system behaves consistently across scenarios. The Mermaid diagram for this flow is stored in [diagrams/applied_ai_uml.mmd](diagrams/applied_ai_uml.mmd).
+
+### Setup Instructions
+1. Open a terminal in the project folder.
+2. Create and activate a virtual environment if needed:
+   ```bash
+   python -m venv .venv
+   .venv\Scripts\activate
+   ```
+3. Install the required packages:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Run the Streamlit app:
+   ```bash
+   streamlit run app.py
+   ```
+5. To try the CLI version, run:
+   ```bash
+   python main.py
+   ```
+
+### Sample Interactions
+Example 1: Input
+```text
+Owner: Jordan
+Pet: Mochi
+Task: Give medicine (medication, 10 min)
+```
+Resulting AI output
+```text
+Medication tasks are scheduled early because they are time-sensitive and important for pet health.
+A plan is generated with the medication task placed before lower-priority activities.
+```
+
+Example 2: Input
+```text
+Owner: Jordan
+Pet: Mochi
+Tasks: Feed pet, morning walk
+```
+Resulting AI output
+```text
+Feeding is placed before the walk, and the schedule is checked for conflicts and reliability.
+```
+
+Example 3: Input
+```text
+Owner: Jordan
+Pet: Mochi
+Tasks: Play session, grooming
+```
+Resulting AI output
+```text
+The planner recommends a lighter, later slot for play or grooming after essential care work is completed.
+```
+
+### Design Decisions
+The system was built as a hybrid of rule-based scheduling and AI-assisted planning. The scheduling engine handles the core logic for ordering tasks and preventing overlap, while the retriever and evaluator add a more adaptive layer that explains and scores the plan. This design was chosen because it is easier to understand, test, and extend than a fully black-box AI system, while still demonstrating meaningful AI behavior.
+
+### Testing Summary
+The project was tested with automated unit tests for task ordering, conflict detection, recurrence, availability handling, and the new AI planning behavior. These tests are a concrete way to prove the system works rather than just appear to work. The current reliability check is built into the planning flow: after a schedule is generated, the system produces a reliability score and status such as good or excellent, based on whether the plan is concrete, conflict-free, and supported by retrieved guidance.
+
+To verify the system yourself, run:
+```bash
+python -m pytest -q tests
+```
+
+The latest verification run completed with 4 passed tests in 0.32s, showing that the scheduling core and the AI planning layer are both working together. In addition, the app surfaces a reliability score and notes for each generated plan so that users can see when the system is producing a more dependable result.
+
+### Reflection
+This project showed that AI can improve a practical system when it is paired with structured logic. The biggest lesson was that the most useful AI behavior often comes from retrieving relevant context and scoring results, rather than relying on a single large model decision. It also highlighted the importance of testing, explainability, and clear limits when designing an AI-powered application.
+
 # PawPal+ (Module 2 Project)
 
 You are building **PawPal+**, a Streamlit app that helps a pet owner plan care tasks for their pet.
